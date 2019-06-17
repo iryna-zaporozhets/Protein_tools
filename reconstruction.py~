@@ -9,52 +9,50 @@ def reconstruct_pulchra(traj,
                         add_H=False,
                         clear=False,
                         save_traj=False,
-                        out_name="PULCHRA_reconst.xtc",
-                        verbose=True,
-                        rank=0):
+                        out_name="PULCHRA_reconst.pdb",
+                        verbose=True):
     """
     Function creates a pulchra-reconstructed trajectory based on all-atom trajectory
-
+    
     The function works only if the whole trajectory can be completely loaded in memory.
-
+    
     This code used the launches PULCHRA executable. Reference:
     Rotkiewicz, P., & Skolnick, J. (2008). Fast procedure for reconstruction
-    of full-atom protein models from reduced representations.
+    of full-atom protein models from reduced representations. 
     Journal of computational chemistry, 29(9), 1460-5.
-
-    It looks like Pulchra flag -h does not work, so hydrogens are added via gromacs
-    pdb2gmx program.
-
-    Args:
-
+    
+    It looks like Pulchra flag -h does not work, so hydrogens are added via gromacs 
+    pdb2gmx program. 
+    
+    Args: 
+        
         traj      - md_traj trajectory
         save      - path to save ouptut. Should end with "/"
-        pulchra   - path to a pulchra executable (eg. ../Software/pulchra)
+        pulchra   - path to a pulchra executable (eg. ../Software/pulchra) 
         mode      - (default " ") pulchra reconstruction mode,string of flags
                     according to pulchra docs, without a leading hyphen(eg "cs").
-        add_H     - (default False) if true, adds hydrogens using pdb2gmx tool.
+        add_H     - (default False) if true, adds hydrogens using pdb2gmx tool. 
                     Works only if mode does not include -s flag (skip sidechain)
         clear     - (default False) if true, remove all the files from the scratch
                     folder after reconstruction
 
-        save_traj - (default False) if true, the reconstructed trajectory is
+        save_traj - (default False) if true, the reconstructed trajectory is 
                     saved in pdb format
         out_name  - (default "PULCHRA_reconst.pdb") If save_traj=True, the output trajectory
-                     will have be named <out_name>. File extension must be included in
+                     will have be named <out_name>. File extension must be included in 
                     the output_name.
         verbose   -  (default True) Enable more output
-        rank      -  (default 0) rank of process
-
+        
     Return:
-
+    
        rec_traj - reconstructed trajectory
 
-
+    
     """
-
-
-
-
+    
+    
+    
+    
     if verbose:
         print("NOTE: The function uses Scratch directory:")
         print("%sScratch" %save)
@@ -67,57 +65,53 @@ def reconstruct_pulchra(traj,
         print("Delate scratch files  :", clear)
         print("Save pdb              :", save_traj)
         print("  ")
-
+        
     if add_H:  #Need to temporarly disable gmx backup
-        gmx_backup = os.system("echo $GMX_MAXBACKUP")
+        gmx_backup=os.system("echo $GMX_MAXBACKUP")
         print(gmx_backup)
         os.environ["GMX_MAXBACKUP"] = "-1"
         print("WARNING! GMX_MAXBACKUP was set to -1. GMX BACKUP disabled")
         print("starting value of gmx_backup was %s" %gmx_backup)
-
+    
     atoms_to_keep = [a.index for a in traj.topology.atoms if a.name == 'CA']
     traj_alpha = traj.atom_slice(atoms_to_keep)
-
+    
     pulchra_start = time.time()
-
-    os.system('rm -r %sScratch%i' %(save,rank))
-    os.system('mkdir %sScratch%i'% (save,rank))
+    
+    os.system('rm -r %sScratch' %save)
+    os.system('mkdir %sScratch'% save)
     rec_traj_framename=[]
-
-    for i in range(0,traj_alpha.n_frames):
-        savename=("%sScratch%i/input%i.pdb"%(save,rank,i))
+    
+    for i in range(0,traj_alpha.n_frames): 
+        savename=("%sScratch/input%i.pdb"%(save,i))
         traj_alpha[i].save_pdb(savename)
-        os.system("./%s -%s %sScratch%i/input%i.pdb >> pulchra.log" %(pulchra,mode,save,rank,i))
+        os.system("./%s -%s %sScratch/input%i.pdb" %(pulchra,mode,save,i))
         if not add_H:
-            rec_traj_framename.append('%sScratch%i/input%i.rebuilt.pdb' %(save,rank,i))
+            rec_traj_framename.append('%sScratch/input%i.rebuilt.pdb' %(save,i))
         else:
-
+            
             gmx_backup = os.system("echo $GMX_MAXBACKUP")   #Need to disable gmx backup temporaly
-            os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb >> pdb2gmx.log" %(save,rank,i,save,rank,i))
-            rec_traj_framename.append('%sScratch%i/output%i.pdb' %(save,rank,i))
-
-
+            os.system("echo 8 |pdb2gmx -water none -f %sScratch/input%i.rebuilt.pdb -o %sScratch/output%i.pdb" %(save,i,save,i))
+            rec_traj_framename.append('%sScratch/output%i.pdb' %(save,i))
+            
+        
     # Creating a reconstructed trajectory
-    traj_reconst = md.load(rec_traj_framename)
+    traj_reconst=md.load(rec_traj_framename)
 
     if add_H:
         os.environ["GMX_MAXBACKUP"] = str(gmx_backup)
         print("GMX_MAXBACKUP set back to %s" %str(gmx_backup))
-
-
-    # Saving a reconstructed trajectory and writing topology
-    if save_traj:
-        traj_reconst.save("%s%s" %(save,out_name))
-        if add_H:
-            os.system('cp %sScratch%i/output0.pdb %stop_reconst.pdb'  %(save,rank,save))
-        else:
-            os.system('cp %sScratch%i/input0.rebuilt.pdb  %stop_reconst.pdb'  %(save,rank,save))
-
+            
     # Removing scratch files:
     if clear:
-        os.system('rm  %sScratch%i/*' %(save,rank))
-
-    print(traj_reconst)
+        os.system('rm  %sScratch/*' %save)
+    
+    # Saving a reconstructed trajectory
+    if save_traj:
+        traj_reconst.save("%s%s" %(save,out_name))
+    
+        
+    print(traj_reconst)   
 
     print("Time to perform Pulchra reconstruction: ", time.time() - pulchra_start, " seconds")
     return(traj_reconst)
