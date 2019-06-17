@@ -87,7 +87,10 @@ def reconstruct_pulchra(traj,
     for i in range(0,traj_alpha.n_frames):
         savename=("%sScratch%i/input%i.pdb"%(save,rank,i))
         traj_alpha[i].save_pdb(savename)
-        os.system("./%s -%s %sScratch%i/input%i.pdb >> pulchra.log" %(pulchra,mode,save,rank,i))
+        if verbose:
+            os.system("./%s -%s %sScratch%i/input%i.pdb >> pulchra.log" %(pulchra,mode,save,rank,i))
+        else:
+            os.system("./%s -%s %sScratch%i/input%i.pdb >> /dev/null" %(pulchra,mode,save,rank,i))
         if not add_H:
             rec_traj_framename.append('%sScratch%i/input%i.rebuilt.pdb' %(save,rank,i))
         else:
