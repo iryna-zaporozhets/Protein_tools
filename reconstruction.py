@@ -93,7 +93,10 @@ def reconstruct_pulchra(traj,
         else:
 
             gmx_backup = os.system("echo $GMX_MAXBACKUP")   #Need to disable gmx backup temporaly
-            os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb >> pdb2gmx.log" %(save,rank,i,save,rank,i))
+            if verbose:
+                os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb" %(save,rank,i,save,rank,i))
+            else:
+                os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb > /dev/null " %(save,rank,i,save,rank,i))
             rec_traj_framename.append('%sScratch%i/output%i.pdb' %(save,rank,i))
 
 
