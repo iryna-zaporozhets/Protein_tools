@@ -36,7 +36,7 @@ class Bond:
 
 ############################################################################################
 
-dev normalize(vec):
+def normalize(vec):
     norm_vec = np.divide(vec, np.sqrt(vec[0]**2
                                       + vec[1]**2
                                       + vec[2]**2))
@@ -122,11 +122,12 @@ def bilin_matrix(bond_selections, test_frame, noH=False):
 ###############NH######################################################################################
 
 
-def get_NH_vector(frame, list):
-    CN_vector = vector(list[0, 1], frame)
-    CAN_vector = vector(list[2, 1], frame)
+def get_NH_vector(atoms, frame):
+    CN_vector = vector([atoms[0],atoms[1]], frame)
+    CAN_vector = vector([atoms[2],atoms[1]], frame)
     NH_vector = CN_vector + CAN_vector
-    NH_vector = normalize(NH_vector)
+    NH_vector = normalize(NH_vector)    
+    return(NH_vector)
 
 #####################################################################################################
 
@@ -195,14 +196,11 @@ def calculate_rdc_amide_large(traj, topology, RDC_inp_file, minimize_rmsd=True, 
         if match is None:
             continue
         RDCs.append(float(line.split()[6]))  # Work only when RDC are in the 7 coulumn!
-        assert(line.split()[2] == 'N' or line.split()[5] == 'N', "Should have atom N in the bond")
-        assert(line.split()[2] == 'H' or line.split()[5] == 'H', "Should have atom H  in the bond")
-        assert(line.split()[0] == line.split()[3],
-               "Atoms in a bond should belong to the same residue")
-        assert(line.split()[1] == line.split()[4],
-               "Atoms in a bond should belong to the same residue")
-        assert(line.split()[
-               0] != 1, "RDC calculation for the first residue is not implemented yet. Use trajectory with hydrogens")
+        assert line.split()[2] == 'N' or line.split()[5] == 'N', "Should have atom N in the bond"
+        assert line.split()[2] == 'H' or line.split()[5] == 'H', "Should have atom H  in the bond"
+        assert line.split()[0] == line.split()[3], "Atoms in a bond should belong to the same residue"
+        assert line.split()[1] == line.split()[4], "Atoms in a bond should belong to the same residue"
+        assert line.split()[0] != 1, "RDC calculation for the first residue is not implemented yet. Use trajectory with hydrogens"
         bonds.append(Bond(int(line.split()[0]),
                           (line.split()[1]),
                           (line.split()[2]),
@@ -224,13 +222,12 @@ def calculate_rdc_amide_large(traj, topology, RDC_inp_file, minimize_rmsd=True, 
         selection_CA = structure.top.select('resid %i and name CA' % (bond.resid_j-1))
         assert(selection_CA.size != 0)
         bond_selections.append([selection_C[0], selection_N[0], selection_CA[0]])
-
+          
     # Use a trajectory, that has already been superimposed
     print("NOTE: input trajectory should be superimposed")
     if minimize_rmsd:
         print("WARNING! RMSD minimization is not implemented in current function yet")
         print("Use superimposed trajectory as an input")
-
     F_av = np.zeros((len(bond_selections), 5))
     n_of_frames = 0
     print(topology)
