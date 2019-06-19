@@ -34,18 +34,26 @@ class Bond:
 
 
 ############################################################################################
+def normalize(vec):
+    """
+        Function normalizes a given 3D-vector to 1
+    """
+    norm_vec = np.divide(vec, np.sqrt( vec[0]**2
+                                      + vec[1]**2
+                                      + vec[2]**2))
+    return(norm_vec)
 
+
+############################################################################################
 def vector(atom_pair, frame):
     """
     Calculate normalized vectors for a specific pair if atoms in a given frame
     """
-    
-    vec = frame.xyz[0,atom_pair[1],:]-frame.xyz[0,atom_pair[0],:]
-    vec = np.divide(vec, np.sqrt(vec[0]**2 
-                               + vec[1]**2 
-                               + vec[2]**2)
-                      )
+
+    vec = frame.xyz[0, atom_pair[1], :]-frame.xyz[0, atom_pair[0], :]
+    vec = normalize(vec)
     return vec
+
 
 ##############################################################################################
 
@@ -71,7 +79,7 @@ def test_bilin():
 
 ##################################################################################################
 
-def bilin_matrix(bond_selections, test_frame):
+def bilin_matrix(bond_selections, test_frame, noH=False):
 
     """
     Creates a matrix containing bilinear terms for all bonds,
@@ -96,15 +104,35 @@ def bilin_matrix(bond_selections, test_frame):
               
              
     """
-    F = np.empty((len(bond_selections),5))
-    i=0
-    for (pair) in bond_selections:
-        vec = vector(pair,test_frame)
-        bil = bilin(vec)
-        F[i,:]=bil
-        i+=1
+    F = np.empty((len(bond_selections), 5))
+    i = 0
+    if noH == False:
+        for (pair) in bond_selections:
+            vec = vector(pair, test_frame)
+            bil = bilin(vec)
+            F[i, :] = bil
+            i += 1
+    if noH:
+        for (pair) in bond_selections:
+            vec = get_NH_vector(pair, test_frame)
+            bil = bilin(vec)
+            F[i, :] = bil
+            i += 1
     return F
+
 #####################################################################################################
+def get_NH_vector(atoms, frame):
+    """ The function extracts CN and C(alpha)N vectors from a given frame and calculates normalized
+        NH vector
+    """
+    CN_vector = vector([atoms[0],atoms[1]], frame)
+    CAN_vector = vector([atoms[2],atoms[1]], frame)
+    NH_vector = CN_vector + CAN_vector
+    NH_vector = normalize(NH_vector)
+    return(NH_vector)
+#####################################################################################################
+
+
 def calculate_rdc(traj_ref,RDC_inp_file,minimize_rmsd=True,superimpose=False,mode='average'):
     
     """
@@ -357,4 +385,124 @@ def calculate_rdc_large(traj,topology,RDC_inp_file, minimize_rmsd=True,mode='ave
     
     exp_rdc=np.array(RDCs)
     return(exp_rdc,D_av)
-################################################################################################################
+##############################################################################################################
+
+def calculate_rdc_amide_large(traj, topology, RDC_inp_file, minimize_rmsd=True, mode='average'):
+    """
+    Calculate residual dipolar couplings for amide NH bond based on SVD for a long trajectory,
+    when the trajectory cannot be loaded in the memory as a whole.
+
+    In this case, trajectory can include only backbone reconstruction without any hydrogen atoms.
+    The program reads input file and determine corresponding number of residue.
+
+    Args:
+
+       traj      : trajectory file in any format, supported by md_traj
+
+       topology  : topology file (the same as one for mdtraj)
+
+       RDC_inp_file  : file with experimental RDC values.
+                      File format is close to NMRPipe, but NOT EXACTLY the same.
+                      https://www.ibbr.umd.edu/nmrpipe/install.html
+
+                      Coulumn descriptions:
+                      1:  Residue i id
+                      2:  Residue i name
+                      3:  Atom    i name
+                      4:  Residue j id
+                      5:  Residue j name
+                      6:  Atom    j name
+                      7:  RDC for the bond i-j
+
+        minimize_RMSD: Determing, whether superimposion with respect to the frame,
+                       minimizing RMSD, will be done.
+
+                       if minimize_RMSD=True (default)  a frame, minimizing
+                       sum of  C_alpha RMSD with respect to all other frames is found
+
+                       if minimize_RMSD=False  0-th frame is used to as a reference to super
+                       impose all other frames
+
+
+
+    Return: two numpy arrays:
+              exp_rdc - experimental values of RDCs
+              D_av    -  back-calculated  RDCs
+
+
+    Dependencies:
+                Packages  :   re, np, md
+                Classes   :   Bond
+                Functions :   bilin_matrix, vector, bilin
+    """
+    structure = md.load(topology)
+    RDC_input = open(RDC_inp_file, 'r')
+
+    RDCs = []
+    bonds = []
+    for line in RDC_input.readlines():
+        match = re.search(r'^\s*(?P<resid_i>[0-9]+)'
+                          '\s*[A-Z]{3}'
+                          '\s*(?P<name_i>[A-Z\#]{1,4})'
+                          '\s*(?P<resid_j>[0-9]+)'
+                          '\s*[A-Z]{3}'
+                          '\s*(?P<name_j>[A-Z\#]{1,4})'
+                          '\s*(?P<rdc>-?[0-9\.]+)', line)
+        if match is None:
+            continue
+        RDCs.append(float(line.split()[6]))  # Work only when RDC are in the 7 coulumn!
+        assert line.split()[2] == 'N' or line.split()[5] == 'N', "Should have atom N in the bond"
+        assert line.split()[2] == 'H' or line.split()[5] == 'H', "Should have atom H  in the bond"
+        assert line.split()[0] == line.split()[3], "Atoms in a bond should belong to the same residue"
+        assert line.split()[1] == line.split()[4], "Atoms in a bond should belong to the same residue"
+        assert line.split()[0] != 1, "RDC calculation for the first residue is not implemented yet. Use trajectory with hydrogens"
+        bonds.append(Bond(int(line.split()[0]),
+                          (line.split()[1]),
+                          (line.split()[2]),
+                          int(line.split()[3]),
+                          (line.split()[4]),
+                          (line.split()[5]))
+                     )
+
+    RDC_input.close()
+
+    bond_selections = []
+    for bond in bonds:
+        # -1 correspond to transition between PDB numeration and MDTRAJ numeration
+        # Names of atoms in input files should be the same as one used by mdtraj
+        selection_C = structure.top.select('resid %i and name C' % (bond.resid_i-2))
+        assert(selection_C.size != 0)
+        selection_N = structure.top.select('resid %i and name N' % (bond.resid_j-1))
+        assert(selection_N.size != 0)
+        selection_CA = structure.top.select('resid %i and name CA' % (bond.resid_j-1))
+        assert(selection_CA.size != 0)
+        bond_selections.append([selection_C[0], selection_N[0], selection_CA[0]])
+          
+    # Use a trajectory, that has already been superimposed
+    print("NOTE: input trajectory should be superimposed")
+    if minimize_rmsd:
+        print("WARNING! RMSD minimization is not implemented in current function yet")
+        print("Use superimposed trajectory as an input")
+    F_av = np.zeros((len(bond_selections), 5))
+    n_of_frames = 0
+    print(topology)
+    for chunks in md.iterload(traj, chunk=1, top=topology):
+        n_of_frames += 1
+        F_av = F_av + bilin_matrix(bond_selections, chunks, noH=True)
+    F_av = np.divide(F_av, n_of_frames)
+    A_av, residuals,  rank, s = np.linalg.lstsq(F_av, np.array(RDCs), rcond=-1)
+
+    if mode == 'average':
+        D_av = np.dot(F_av, A_av)
+
+    if mode == 'full':
+        D_full = []
+        for chunks in md.iterload(traj, chunk=1, top=topology):
+            F = bilin_matrix(bond_selections, chunks, noH=True)
+            D = np.dot(F, A_av)
+            D_full.append(D)
+        D_av = np.array(D_full)
+
+    exp_rdc = np.array(RDCs)
+    return(exp_rdc, D_av)
+####################################################################################################
