@@ -243,7 +243,7 @@ def calculate_rdc_amide_large(traj, topology, RDC_inp_file, minimize_rmsd=True, 
     if mode == 'full':
         D_full = []
         for chunks in md.iterload(traj, chunk=1, top=topology):
-            F = bilin_matrix(bond_selections, chunks)
+            F = bilin_matrix(bond_selections, chunks, noH=True)
             D = np.dot(F, A_av)
             D_full.append(D)
         D_av = np.array(D_full)
