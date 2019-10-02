@@ -52,4 +52,4 @@ Dictionary names_1_to_3 maps 1-letter residue codes to 3-letter codes.
 Generated based on names_3_to_1 dictionary
 Reference: https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1996.pdf
 """
-names_3_to_1 = {value:key for (key,value) in  names_1_to_3.items()}
+names_1_to_3 = {value:key for (key,value) in  names_3_to_1.items()}
