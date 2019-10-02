@@ -43,7 +43,8 @@ def find_atoms_to_delete(res1,res2):
 
 def revome_pdb_entry(pdb_file,entry_list,output_file):
     """
-    The function removes particular entries from pdb file
+    The function generate a new pdb_file with
+    entries, listed in entry_list, removed 
 
     parameters
     ----------
