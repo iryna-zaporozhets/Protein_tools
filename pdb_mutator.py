@@ -1,6 +1,6 @@
 import mdtraj as md
 import re
-from .pdb_dicts import dict_of_heavy_atoms, names_3_to_1
+from pdb_dicts import dict_of_heavy_atoms, names_3_to_1
 
 
 def find_atoms_to_delete(res1,res2):
@@ -44,7 +44,7 @@ def find_atoms_to_delete(res1,res2):
 def revome_pdb_entry(pdb_file,entry_list,output_file):
     """
     The function generate a new pdb_file with
-    entries, listed in entry_list, removed 
+    entries, listed in entry_list, removed
 
     parameters
     ----------
