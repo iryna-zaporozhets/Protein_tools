@@ -140,7 +140,8 @@ def decode_mutation(mutation_code):
     The function decodes mutation code in format X00Y, where X- one-letter code
     of initial aminoacid, Y - one-letter code of aminoacid upon mutation, 00 represents
     number of aminoacid residue (in PDB format, indexed from 1)
-    returns a tuple (number of aminoacid residue, X in 3-letter format, Y in 3-letter format)
+    returns a tuple (number of aminoacid residue 00, in PDB format,
+     X in 3-letter format, Y in 3-letter format)
     """
     return (int(mutation_code[1:len(mutation_code)-1]),
             names_1_to_3[mutation_code[0]],
