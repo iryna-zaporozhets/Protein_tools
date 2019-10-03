@@ -134,3 +134,16 @@ def mutate_structure(input_pdb,resid_to_mutate,resname_before,resname_after,wt_s
     if clean:
         revome_pdb_entry(structure_name,['TER','ENDMDL'],'%s_%s%d%s_cleaned.pdb' %(wt_structure_name,names_3_to_1[resname_before],resid_to_mutate, names_3_to_1[resname_after]))
     return 0
+
+def decode_mutation(mutation_code):
+    """
+    The function decodes mutation code in format X00Y, where X- one-letter code
+    of initial aminoacid, Y - one-letter code of aminoacid upon mutation, 00 represents
+    number of aminoacid residue (in PDB format, indexed from 1)
+    returns a tuple (number of aminoacid residue, X in 3-letter format, Y in 3-letter format)
+    """
+
+    print(mutation_code)
+    return (int(mutation_code[1:len(mutation_code)-1]),
+            pdb_dicts.names_1_to_3[mutation_code[0]],
+            pdb_dicts.names_1_to_3[mutation_code[-1]])
