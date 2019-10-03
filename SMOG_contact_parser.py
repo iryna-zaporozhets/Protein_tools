@@ -4,6 +4,8 @@ to coarse-grained representation
 """
 import numpy as np
 import mdtraj as md
+import pdb_mutator
+import pdb_dicts
 
 def read_SMOG_contact_file(infile,omit_chains=True):
     """
@@ -262,6 +264,47 @@ def write_pairs_dictionary(pairs_dictionary,filename):
         out_file.write("%5d  %5d   %5d \n" %(pair[0], pair[1],num_of_count))
     out_file.close()
     return 0
+
+def find_mutation_contacts(mutation, wt_contacts,topology_file):
+    """ The function creates array of native contacts in mutant based
+        on mutation code and list of
+
+    parameters
+    ----------
+
+    mutation : str
+    mutation code in format X00Y, where X,Y-one-letter codes of aminoacids,
+    00 -number of aminoacid in pdb format
+
+    wt_contacts : numpy array
+    2D array with 2 columns.
+    Each row in the array represent a single contact, with entries, that correspond to atom index in pdb format
+
+    topology_file : str
+    file with mdtraj topology. Should use the same file as one used to generate wt_contacts
+
+    returns
+    -------
+    mutation_contacts : numpy array
+
+    """
+    wt_topology = wt_topology = md.load(topology_file).top
+    res_id, res1, res2 = pdb_mutator.decode_mutation(mutation)
+    atoms_to_delete = pdb_mutator.find_atoms_to_delete(res1, res2)
+    # selection - atom index, that should be deleted.  Atom indexed from 0.
+    selection = [atom.index for atom in wt_topology.atoms
+                 if ((atom.residue.index == res_id-1)
+                     and (atom.name in atoms_to_delete))]
+    pair_number_to_delete = []
+    for pair_number in range(wt_contacts.shape[0]):
+        for atom in selection:
+            # Pairs are in PDB notation, atoms - in Python (need to account for different indexing with 1)
+            if atom+1 in wt_contacts[pair_number, :].tolist():
+                pair_number_to_delete.append(pair_number)
+    mutation_contacts = np.delete(wt_contacts, pair_number_to_delete, axis=0)
+
+    return mutation_contacts
+
 
 
 
