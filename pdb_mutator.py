@@ -142,8 +142,6 @@ def decode_mutation(mutation_code):
     number of aminoacid residue (in PDB format, indexed from 1)
     returns a tuple (number of aminoacid residue, X in 3-letter format, Y in 3-letter format)
     """
-
-    print(mutation_code)
     return (int(mutation_code[1:len(mutation_code)-1]),
             names_1_to_3[mutation_code[0]],
             names_1_to_3[mutation_code[-1]])
