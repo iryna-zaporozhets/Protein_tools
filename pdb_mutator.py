@@ -1,6 +1,6 @@
 import mdtraj as md
 import re
-from pdb_dicts import dict_of_heavy_atoms, names_3_to_1
+from pdb_dicts import dict_of_heavy_atoms, names_3_to_1, names_1_to_3
 
 
 def find_atoms_to_delete(res1,res2):
@@ -145,5 +145,5 @@ def decode_mutation(mutation_code):
 
     print(mutation_code)
     return (int(mutation_code[1:len(mutation_code)-1]),
-            pdb_dicts.names_1_to_3[mutation_code[0]],
-            pdb_dicts.names_1_to_3[mutation_code[-1]])
+            names_1_to_3[mutation_code[0]],
+            names_1_to_3[mutation_code[-1]])
