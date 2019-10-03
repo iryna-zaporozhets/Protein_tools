@@ -2,6 +2,7 @@
 The module contains functions for parsing SMOG contacts and converting them
 to coarse-grained representation
 """
+import numpy as np
 
 def read_SMOG_contact_file(infile,omit_chains=True):
     """
