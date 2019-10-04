@@ -210,7 +210,6 @@ class ModelParameters():
         else:
             raise ValueError("Interaction between particles %d and %d does not exists in the model" %(pair[0],pair[1]))
 
-        return 0
 
 
 
