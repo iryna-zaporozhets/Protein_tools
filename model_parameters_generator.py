@@ -55,6 +55,9 @@ class NonBondedInteraction(Interaction):
     def set_strength_value(self,strength_value):
         self.strength_value = strength_value
 
+    def get_strength_value(self):
+            return self.strength_value
+
     @classmethod
     def read(cls,input_string,strength=None,parameter_dict=parameter_dictionary):
         """
@@ -200,7 +203,12 @@ class ModelParameters():
     def get_interaction_strength(self,pair):
         """
         The methods returns interaction strength (epsilon value) of a particular
-        interaction
+        interaction.
+
+        Parameters:
+        -----------
+        pair: list of int
+        Contains a list of two integers, representing atoms. PDB notation
 
         """
 
