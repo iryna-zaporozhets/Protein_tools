@@ -179,3 +179,90 @@ def test_find_mutation_contacts():
     assert  np.all(np.equal(SMOG_contact_parser.find_mutation_contacts('T2G',contacts,topfile)
                                ,T2G_contacts)
                                 )
+
+def test_create_CACB_exclusions():
+    '''
+    SMOG_contact_parser.create_CACB_exclusions
+    '''
+    contacts = np.array ([
+                        [9,19],[12,18],[11,21],
+                        [17,22],
+                        [10,23],[17,20],
+                        [1,18], [4,20], [4,21],
+                        [5,22],[5,23],[5,24],
+                        [1,25],
+                        [1,26], [2,26], [3,29], [4,27],
+                        [5,30], [5,36],
+                        [3,30], [5,26],
+                        [2,37], [1,37], [3,38],
+                        [5,43], [8,43], [8,42], [7,42],
+                        [3,41]
+                       ])
+
+    # [9,19],[12,18],[11,21],         # CaCa 2-3: [3,5] (3 contacts)
+    # [17,22],                        # CbCb 2-3: [4,6] (1 contacts)
+    # [10,23],[17,20],                # CaCb 2-3: [3,6],[4,5] (2 contacts)
+    # [1,18], [4,20], [4,21],         # CaCa 1-3: [1,5]  (3 contacts)
+    # [5,22],[5,23],[5,24],           # CbCb 1-3: [2,6]  (3 contacts)
+    # [1,25],                         # CaCb 1-3: [1,6]  (1 contact)
+    # [1,26], [2,26], [3,29], [4,27]  # CaCa 1-4: [1,7] (4 contacts)
+    # [5,30], [5,36],                 # CbCb 1-4: [2,8] (2 contacts)
+    # [3,30], [5,26],                 # CaCb 1-4: [1,8],[2,7] (2 contacts)
+    # [2,37], [1,37], [3,38],         # CaCa 1-5: [1,9]   (3 contacts)
+    # [5,43], [8,43], [8,42], [7,42], # CbCb 1-5:  [2,10] (4 contacts)
+     #[3,41],                         # CaCb 1-5: [1,10] ( 1 contact)
+     # ]
+
+     # Trial 1. cutAA, cutBB, cutAB =2
+    new_pairs, pairs_dictionary = SMOG_contact_parser.create_CACB_exclusions(
+                            'test_create_CACB_exclusions/All_atom.pdb',
+                            'test_create_CACB_exclusions/CaCb.pdb',
+                            contacts,
+                            cutAA=2,
+                            cutBB=2,
+                            cutAB=2)
+    print (new_pairs)
+    assert np.all(np.equal(new_pairs, np.array([[1,5],
+                                                [1,7],
+                                                [1,9],
+                                                [2,6],
+                                                [2,8],
+                                                [2,10]]
+                                                )))
+
+    target_pair_dictionary = {
+    (1,5): 3,
+    (1,7): 4,
+    (1,9): 3,
+    (2,6): 3,
+    (2,8): 2,
+    (2,10): 4
+    }
+
+    assert len(pairs_dictionary)==len(target_pair_dictionary)
+    for pair in pairs_dictionary:
+        assert pairs_dictionary[pair] == target_pair_dictionary[pair]
+
+    # Trial 2. cutAA = 4 cutBB, cutAB =1
+    new_pairs, pairs_dictionary = SMOG_contact_parser.create_CACB_exclusions(
+                            'test_create_CACB_exclusions/All_atom.pdb',
+                            'test_create_CACB_exclusions/CaCb.pdb',
+                            contacts,
+                            cutAA=4,
+                            cutBB=3,
+                            cutAB=1)
+    print (new_pairs)
+    assert np.all(np.equal(new_pairs, np.array([[1,9],
+                                                [2,8],
+                                                [2,10]]
+                                                )))
+
+    target_pair_dictionary = {
+    (1,9): 3,
+    (2,8): 2,
+    (2,10): 4
+    }
+
+    assert len(pairs_dictionary)==len(target_pair_dictionary)
+    for pair in pairs_dictionary:
+        assert pairs_dictionary[pair] == target_pair_dictionary[pair]
