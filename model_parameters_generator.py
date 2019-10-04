@@ -132,6 +132,14 @@ class ModelParameters():
     def read(self,input_model_params,input_pairwise_params):
         """
         Reads parameter from the input file.
+
+        Parameters:
+        -----------
+        input_model_param : str
+                           Path to the file with strength of interactions
+
+        input_pairwise_params : str
+                              Path to the file with interaction description
         """
         strength_array = np.loadtxt(input_model_params)
         with open(input_pairwise_params) as file:
@@ -184,6 +192,21 @@ class ModelParameters():
         if index != -1:
             parameter = self.model_params[index]
             parameter.set_strength_value(new_strength)
+        else:
+            raise ValueError("Interaction between particles %d and %d does not exists in the model" %(pair[0],pair[1]))
+
+        return 0
+
+    def get_interaction_strength(self,pair):
+        """
+        The methods returns interaction strength (epsilon value) of a particular
+        interaction
+
+        """
+
+        index = self.includes_intraction(pair)
+        if index != -1:
+            return self.model_params[index]
         else:
             raise ValueError("Interaction between particles %d and %d does not exists in the model" %(pair[0],pair[1]))
 
