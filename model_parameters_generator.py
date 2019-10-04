@@ -214,9 +214,20 @@ class ModelParameters():
 
         index = self.includes_intraction(pair)
         if index != -1:
-            return self.model_params[index]
+            parameter = self.model_params[index]
+            return parameter.get_strength_value()
         else:
             raise ValueError("Interaction between particles %d and %d does not exists in the model" %(pair[0],pair[1]))
+
+    def get_epsilon_array(self):
+        """
+        The method returns an array of epsilons
+        """
+        epsilons = np.zeros(len(self.model_params))
+
+        for index,interaction in enumerate(self.model_params):
+            epsilons[index] = interaction.get_strength_value()
+        return epsilons
 
 
 
