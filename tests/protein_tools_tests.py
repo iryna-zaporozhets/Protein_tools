@@ -1,6 +1,8 @@
 import pdb_mutator
 import SMOG_contact_parser
+import md_nmr2 as nmr
 import numpy as np
+
 
 def test_find_atoms_to_delete():
     """
@@ -266,3 +268,23 @@ def test_create_CACB_exclusions():
     assert len(pairs_dictionary)==len(target_pair_dictionary)
     for pair in pairs_dictionary:
         assert pairs_dictionary[pair] == target_pair_dictionary[pair]
+
+def test_normalize():
+    print(dir(nmr))
+    cutoff = 1e-14
+    vec1 = [3.0,4.0,5.0]
+    normalized = nmr.normalize(vec1)
+    vector_norm = np.linalg.norm(vec1)
+    for i in range(3):
+        assert (normalized[i] - vec1[i]/vector_norm ) < cutoff
+
+    vec2 = [0.00,0.00,1.00]
+    normalized = nmr.normalize(vec2)
+    for i in range(3):
+        assert (normalized[i] - vec2[i]) < cutoff
+
+def test_bilin():
+    test_vector = np.array([1,2,4])
+    result = np.array([-15, -12,   4,   8,  16])
+    assert(np.array_equal(nmr.bilin(test_vector),result))
+    print ("Passed successfully")
