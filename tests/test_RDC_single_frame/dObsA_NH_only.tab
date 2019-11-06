@@ -1,0 +1,81 @@
+
+#
+# Dipolar Couplings for ubiquitin. Neutral Bicelle sample.
+#
+#  D  is the dipolar coupling, Hz.
+#  DD is the estimated uncertainty in the dipolar coupling, Hz.
+#  W  is a multipication factor used to scale couplings for statistics such as RMS.
+
+DATA SEQUENCE MQIFVKTLTG KTITLEVEPS DTIENVKAKI QDKEGIPPDQ QRLIFAGKQL
+DATA SEQUENCE EDGRTLSDYN IQKESTLHLV LRLRGG
+
+VARS   RESID_I RESNAME_I ATOMNAME_I RESID_J RESNAME_J ATOMNAME_J D
+FORMAT %5d %6s %6s %5d %6s %6s %9.3f 
+
+    2    GLN      N     2    GLN     H    -15.524
+    3    ILE      N     3    ILE     H     10.521
+    4    PHE      N     4    PHE     H      9.648
+    5    VAL      N     5    VAL     H      6.082
+    6    LYS      N     6    LYS     H      3.854
+    7    THR      N     7    THR     H     -3.403
+    8    LEU      N     8    LEU     H     15.055
+   10    GLY      N    10    GLY     H      8.807
+   11    LYS      N    11    LYS     H    -16.938
+   12    THR      N    12    THR     H      2.505
+   13    ILE      N    13    ILE     H      0.700
+   14    THR      N    14    THR     H      6.435
+   15    LEU      N    15    LEU     H     14.197
+   16    GLU      N    16    GLU     H      0.077
+   17    VAL      N    17    VAL     H      1.964
+   18    GLU      N    18    GLU     H    -20.115
+   20    SER      N    20    SER     H    -12.089
+   21    ASP      N    21    ASP     H      4.583
+   22    THR      N    22    THR     H     23.730
+   23    ILE      N    23    ILE     H      3.832
+   25    ASN      N    25    ASN     H     -2.547
+   26    VAL      N    26    VAL     H      3.172
+   27    LYS      N    27    LYS     H      5.074
+   28    ALA      N    28    ALA     H     -1.758
+   29    LYS      N    29    LYS     H      2.717
+   30    ILE      N    30    ILE     H      3.619
+   31    GLN      N    31    GLN     H      4.870
+   32    ASP      N    32    ASP     H     -3.466
+   33    LYS      N    33    LYS     H      3.358
+   34    GLU      N    34    GLU     H      4.364
+   35    GLY      N    35    GLY     H    -13.489
+   36    ILE      N    36    ILE     H    -24.368
+   39    ASP      N    39    ASP     H     17.724
+   40    GLN      N    40    GLN     H      0.156
+   41    GLN      N    41    GLN     H     26.400
+   42    ARG      N    42    ARG     H     11.607
+   43    LEU      N    43    LEU     H     13.330
+   44    ILE      N    44    ILE     H      4.369
+   45    PHE      N    45    PHE     H     -2.996
+   46    ALA      N    46    ALA     H      1.186
+   47    GLY      N    47    GLY     H      4.386
+   48    LYS      N    48    LYS     H    -22.970
+   49    GLN      N    49    GLN     H     -2.830
+   50    LEU      N    50    LEU     H      3.921
+   54    ARG      N    54    ARG     H     -5.530
+   55    THR      N    55    THR     H      2.254
+   56    LEU      N    56    LEU     H     19.041
+   57    SER      N    57    SER     H     25.262
+   58    ASP      N    58    ASP     H     12.082
+   59    TYR      N    59    TYR     H     12.029
+   60    ASN      N    60    ASN     H     25.031
+   61    ILE      N    61    ILE     H     19.071
+   62    GLN      N    62    GLN     H     16.255
+   63    LYS      N    63    LYS     H    -15.433
+   64    GLU      N    64    GLU     H     22.597
+   65    SER      N    65    SER     H     19.752
+   66    THR      N    66    THR     H     16.216
+   67    LEU      N    67    LEU     H      8.135
+   68    HIS      N    68    HIS     H      4.568
+   69    LEU      N    69    LEU     H      6.565
+   70    VAL      N    70    VAL     H     13.497
+   71    LEU      N    71    LEU     H     21.297
+   72    ARG      N    72    ARG     H     12.554
+   73    LEU      N    73    LEU     H     12.059
+   74    ARG      N    74    ARG     H      6.600
+   75    GLY      N    75    GLY     H      3.899
+   76    GLY      N    76    GLY     H      1.700

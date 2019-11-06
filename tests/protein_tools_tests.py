@@ -2,6 +2,7 @@ import pdb_mutator
 import SMOG_contact_parser
 import md_nmr2 as nmr
 import numpy as np
+import mdtraj as md
 
 
 def test_find_atoms_to_delete():
@@ -286,5 +287,21 @@ def test_normalize():
 def test_bilin():
     test_vector = np.array([1,2,4])
     result = np.array([-15, -12,   4,   8,  16])
-    assert(np.array_equal(nmr.bilin(test_vector),result))
-    print ("Passed successfully")
+    assert np.array_equal(nmr.bilin(test_vector),result)
+
+
+def test_calculate_rdc():
+    """
+    Test compares output of calculate_rdc_large function
+    with ouput of https://spin.niddk.nih.gov/bax/nmrserver/dc/svd.html
+    """
+    traj = 'test_RDC_single_frame/ubiq.pdb'
+    RDC_inp_file = 'test_RDC_single_frame/dObsA_NH_only.tab'
+    exp_rdc, dav = nmr.calculate_rdc_large(traj,
+                                                 topology=traj,
+                                                 RDC_inp_file=RDC_inp_file,
+                                                 minimize_rmsd=False,
+                                                 mode='average')
+    reference = np.loadtxt('test_RDC_single_frame/dCalcA_reference_10_14_2019NMRServer.tab')
+    for i in range(len(exp_rdc)):
+        assert (reference[i]-dav[i]) < 0.001

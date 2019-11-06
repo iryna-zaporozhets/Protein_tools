@@ -187,6 +187,98 @@ def create_CACB_exclusions(all_atom_pdb, cacb_atom_pdb, contacts, cutAA=4, cutBB
     return new_pairs, pairs_dictionary
 
 
+def create_CA_exclusions(all_atom_pdb, ca_atom_pdb, contacts, cutAA=4):
+    """Parse an all-atom contact file fro SMOG and covert to Ca contacts.
+    Two Ca atoms are considered in contact if
+
+    Rules for exclusions are based off the following reference:
+    Cheung,et.al. 'Exploring the interplay between topology and secondary structural
+        formation in the protein folding problem'. J.Chem.Phys. B. 2003.
+
+    Parameters
+    ----------
+    all_atom_pdb : str
+        String corresponding to the all-atom pdb file for loading in mdtraj
+    cacb_atom_pdb : str
+        String corresponding to cacb-pdb pdb file for loading in mdtraj
+    contacts : array Nx2
+        Array containing atom contacts, index base 1 from SMOG.
+
+    """
+
+    # Exclude neighbors closer in sequence than:
+    #   |i - j| < 4 for CA_i CA_i pairs
+    cutAA = cutAA
+    traj = md.load(all_atom_pdb)
+    top = traj.top
+    catraj = md.load(ca_atom_pdb)
+    ca_top = catraj.top
+    contacts_zero = contacts - 1
+    assert np.shape(contacts_zero)[1] == 2
+    num_pairs = np.shape(contacts_zero)[0]
+    # Loop over all pairs, then add to the new_pairs list
+    new_pairs = []
+    last_pair = [-10, -10]
+
+    pairs_dictionary = {} # Dictionary, wich matches CG pairs and number of
+                         # all-atom contacts
+    for pair_idx in range(num_pairs):
+        idx1 = contacts_zero[pair_idx, 0]
+        idx2 = contacts_zero[pair_idx, 1]
+
+        atm1 = top.atom(idx1)
+        atm2 = top.atom(idx2)
+        resid1 = atm1.residue.index
+        resid2 = atm2.residue.index
+        if (resid2 - resid1) >= cutAA:
+            new_atm1 = ca_top.residue(resid1).atom(0)
+            new_atm2 = ca_top.residue(resid2).atom(0)
+            add_pair(new_pairs, new_atm1, new_atm2, pairs_dict=pairs_dictionary)
+    new_pairs = np.array(new_pairs)
+    print(new_pairs)
+    old_size =  np.shape(new_pairs)[0]
+    # sort the array
+    sorted_indices = np.argsort(new_pairs[:,0])
+    new_pairs_list = []
+    next_sort_pairs = []
+    next_sort_indices = []
+    current_idx = new_pairs[sorted_indices[0], 0]
+    temporary = []
+    make_next_idx = False
+    for sort_idx in sorted_indices:
+        if new_pairs[sort_idx,0] == current_idx:
+            temporary.append(new_pairs[sort_idx,:])
+        else:
+            new_array = np.array(temporary)
+            try:
+                assert np.shape(new_array)[1] == 2
+            except:
+                print(np.shape(new_array))
+            next_sort_pairs.append(np.copy(new_array))
+            new_sorted = np.argsort(new_array[:,1])
+            next_sort_indices.append(new_sorted)
+            temporary = [new_pairs[sort_idx,:]]
+            current_idx = new_pairs[sort_idx,0]
+    new_array = np.array(temporary)
+    next_sort_pairs.append(np.copy(new_array))
+    new_sorted = np.argsort(new_array[:,1])
+    next_sort_indices.append(new_sorted)
+
+    for idx,pair_sets in enumerate(next_sort_pairs):
+        assert np.shape(pair_sets)[0] == np.shape(next_sort_indices[idx])[0]
+        for jdx in next_sort_indices[idx]:
+            new_pairs_list.append(pair_sets[jdx,:])
+
+    new_pairs = np.array(new_pairs_list)
+    try:
+        assert np.shape(new_pairs)[0] == old_size
+    except:
+        print(np.shape(new_pairs)[0])
+        print(old_size)
+        #raise
+    return new_pairs, pairs_dictionary
+
+
 def make_pairwise_files(cacb_pdb,
                         pairs,
                         pairwise_params='pairwise_params',
