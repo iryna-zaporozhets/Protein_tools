@@ -189,7 +189,8 @@ def create_CACB_exclusions(all_atom_pdb, cacb_atom_pdb, contacts, cutAA=4, cutBB
 
 def create_CA_exclusions(all_atom_pdb, ca_atom_pdb, contacts, cutAA=4):
     """Parse an all-atom contact file fro SMOG and covert to Ca contacts.
-    Two Ca atoms are considered in contact if
+    Two Ca atoms are considered in contact if for the corresponding pair of residues
+    there is at least one pair of atoms in contact.
 
     Rules for exclusions are based off the following reference:
     Cheung,et.al. 'Exploring the interplay between topology and secondary structural
@@ -205,10 +206,6 @@ def create_CA_exclusions(all_atom_pdb, ca_atom_pdb, contacts, cutAA=4):
         Array containing atom contacts, index base 1 from SMOG.
 
     """
-
-    # Exclude neighbors closer in sequence than:
-    #   |i - j| < 4 for CA_i CA_i pairs
-    cutAA = cutAA
     traj = md.load(all_atom_pdb)
     top = traj.top
     catraj = md.load(ca_atom_pdb)
