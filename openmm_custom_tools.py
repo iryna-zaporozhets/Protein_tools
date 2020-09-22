@@ -1,6 +1,35 @@
 """
-Module contains custom openMM tools.
+Module contains custom openMM tools:
+
+generate_system_report(system object) : print a detailed human-readable report about the content of system object  
+get_force_by_name(<system object>, <force name string>) : returns reference to a force by its name
 """
+
+def get_force_by_name(system,force_name):
+    """
+    Return a list of references to forces in the system that have a name specified by the force_name
+    The force name must be specified exactly as in OpenMM documentation.
+
+    """
+    forces = system.getForces()
+    forces_to_return = []
+    count = 0
+    for force in forces:
+        if type(force).__name__ == force_name:
+            count += 1
+            forces_to_return.append(force)
+    print("{} forces with name {} were found.".format(count,force_name))
+    return forces_to_return
+
+def get_single_force_index_by_name(system, force_name):
+    """
+    Returns an index of the first force with a specified name
+    """
+    forces = system.getForces()
+    for ndx, force in enumerate(forces):
+        if type(force).__name__ == force_name:
+            return  ndx
+    return None
 
 def _report_NonbondedForce(force):
     """
