@@ -86,7 +86,7 @@ def rms(a,normalization='n'):
         norm=a.shape[0]
 
 
-    calculated_rms = np.sqrt(np.sum(np.square(a))/norm)
+    calculated_rms = np.sqrt(np.mean(np.square(a))/norm)
     return(calculated_rms)
 
 
