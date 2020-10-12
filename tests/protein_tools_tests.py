@@ -1,6 +1,6 @@
-import pdb_mutator
-import SMOG_contact_parser
-import md_nmr2 as nmr
+from Protein_tools import pdb_mutator
+from Protein_tools import SMOG_contact_parser
+from Protein_tools import md_nmr2 as nmr
 import numpy as np
 import mdtraj as md
 

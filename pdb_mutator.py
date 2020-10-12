@@ -1,6 +1,6 @@
 import mdtraj as md
 import re
-from pdb_dicts import dict_of_heavy_atoms, names_3_to_1, names_1_to_3
+from .pdb_dicts import dict_of_heavy_atoms, names_3_to_1, names_1_to_3
 
 
 def find_atoms_to_delete(res1,res2):

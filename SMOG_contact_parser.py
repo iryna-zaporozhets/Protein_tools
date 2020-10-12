@@ -4,8 +4,8 @@ to coarse-grained representation
 """
 import numpy as np
 import mdtraj as md
-import pdb_mutator
-import pdb_dicts
+from . import pdb_mutator
+from . import pdb_dicts
 
 def read_SMOG_contact_file(infile,omit_chains=True):
     """
