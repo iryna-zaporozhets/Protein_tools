@@ -7,6 +7,8 @@ def reconstruct_pulchra(traj,
                         pulchra,
                         mode=" ",
                         add_H=False,
+                        minimize=False,
+                        minimization_params=None,
                         clear=False,
                         save_traj=False,
                         out_name="PULCHRA_reconst.xtc",
@@ -34,6 +36,9 @@ def reconstruct_pulchra(traj,
                     according to pulchra docs, without a leading hyphen(eg "cs").
         add_H     - (default False) if true, adds hydrogens using pdb2gmx tool.
                     Works only if mode does not include -s flag (skip sidechain)
+        minimize  - (default False) if true, energy minimization is performed, with parameters,
+                    described in the file `minimization_params'
+        minimizaiton_params - (default None)  name of the file with minimization parameters, used if minimize = True
         clear     - (default False) if true, remove all the files from the scratch
                     folder after reconstruction
 
@@ -64,6 +69,8 @@ def reconstruct_pulchra(traj,
         print("Pulchra executable    :", pulchra)
         print("Reconstruction mode   :", mode)
         print("Add hydrogens(pdb2gmx):", add_H)
+        print("Minimize              :", minimize)
+        print("Minimization parameter:", minimization_params)
         print("Delate scratch files  :", clear)
         print("Save pdb              :", save_traj)
         print("  ")
@@ -94,13 +101,24 @@ def reconstruct_pulchra(traj,
         if not add_H:
             rec_traj_framename.append('%sScratch%i/input%i.rebuilt.pdb' %(save,rank,i))
         else:
-
             gmx_backup = os.system("echo $GMX_MAXBACKUP")   #Need to disable gmx backup temporaly
             if verbose:
                 os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb" %(save,rank,i,save,rank,i))
             else:
                 os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb > /dev/null " %(save,rank,i,save,rank,i))
-            rec_traj_framename.append('%sScratch%i/output%i.pdb' %(save,rank,i))
+            if minimize:
+                os.system("printf '8\n1\n1\n' |pdb2gmx -f  %sScratch%i/output%i.pdb -ignh -ter -o %sScratch%i/all.gro -i %sScratch%i/all.itp -water none -p %sScratch%i/all.top" %( save,rank,i,save,rank,save,rank,save,rank ))
+                os.system("grompp -f  %s  -c %sScratch%i/all.gro -p %sScratch%i/all.top -o %sScratch%i/all.tpr -maxwarn 2" %(minimization_params, save,rank,save,rank,save,rank))
+                root = os.getcwd()
+                print(root)
+                os.chdir("%sScratch%i" %(save,rank))
+                print(os.getcwd())
+                result_code = os.system("mdrun -nov -compact -deffnm all -c all_post_%i.pdb" %(i))
+                assert result_code == 0, "Incorect exit code: %i " %result_code
+                os.chdir(root)
+                rec_traj_framename.append("%sScratch%i/all_post_%i.pdb" %(save, rank, i))
+            else:
+                rec_traj_framename.append('%sScratch%i/output%i.pdb' %(save, rank, i))
 
 
     # Creating a reconstructed trajectory
