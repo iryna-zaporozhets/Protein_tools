@@ -108,11 +108,13 @@ def reconstruct_pulchra(traj,
                 os.system("printf '8\n1\n' |pdb2gmx -water none -his -f %sScratch%i/input%i.rebuilt.pdb -o %sScratch%i/output%i.pdb > /dev/null " %(save,rank,i,save,rank,i))
             if minimize:
                 os.system("printf '8\n1\n1\n' |pdb2gmx -f  %sScratch%i/output%i.pdb -ignh -ter -o %sScratch%i/all.gro -i %sScratch%i/all.itp -water none -p %sScratch%i/all.top" %( save,rank,i,save,rank,save,rank,save,rank ))
-                os.system("grompp  %s  -c %sScratch%i/all.gro -p %sScratch%i/all.top -o %sScratch%i/all.tpr" %(minimization_params, save,rank,save,rank,save,rank))
+                os.system("grompp -f  %s  -c %sScratch%i/all.gro -p %sScratch%i/all.top -o %sScratch%i/all.tpr -maxwarn 2" %(minimization_params, save,rank,save,rank,save,rank))
                 root = os.getcwd()
-                os.system("cd %sScratch%i")
-                result_code = os.system("mdrun -nov -compact -deffnm all -c all_post_%i.pdb". %(save  rank, i))
-                assert result_code == 0 "Incorect exit code: %i " % result_code
+                print(root)
+                os.chdir("%sScratch%i" %(save,rank))
+                print(os.getcwd())
+                result_code = os.system("mdrun -nov -compact -deffnm all -c all_post_%i.pdb" %(i))
+                assert result_code == 0, "Incorect exit code: %i " %result_code
                 os.chdir(root)
                 rec_traj_framename.append("%sScratch%i/all_post_%i.pdb" %(save, rank, i))
             else:
