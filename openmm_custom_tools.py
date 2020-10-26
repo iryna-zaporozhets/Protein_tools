@@ -196,9 +196,9 @@ def _report_PeriodicTorsionForce(force):
     print(fstr.format("Force Group", force.getForceGroup()))
     num_periodic_torsions = force.getNumTorsions()
     print(fstr.format("Num Torsions", num_periodic_torsions))
-    print("torsion index     particle i    particle j    particle k    particle l    periodicity    k")
+    print("torsion index     particle i    particle j    particle k    particle l    periodicity   phase    k")
     for torsion_ndx in range(num_periodic_torsions):
-        print("{:10d}    {:10d}    {:10d}    {:10d}    {:10d}       {:10d}    {}".format(torsion_ndx, 
+        print("{:10d}    {:10d}    {:10d}    {:10d}    {:10d}       {:10d}    {}  {}".format(torsion_ndx, 
                                                                           *force.getTorsionParameters(torsion_ndx)))
 
 def _report_CustomBondForce(force):
