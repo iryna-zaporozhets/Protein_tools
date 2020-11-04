@@ -289,7 +289,7 @@ class PlottingPackage(object):
 
         self.save_figure(fig, savename)
      
-     def plot_spread(self, data, savename, bins=None, xname="data", yname="count"):
+    def plot_spread(self, data, savename, bins=None, xname="data", yname="count"):
         """ Plot a histogram of data. Construct axes dimensions manually"""
         if bins is None:
             bins = np.sqrt(len(data))
