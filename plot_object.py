@@ -8,6 +8,23 @@ import math
 
 from matplotlib.colors import LinearSegmentedColormap
 
+
+
+def ensure_dir(this_dir):
+    if this_dir[0] == "/":
+        test_dir = "/"
+    else:
+        test_dir = ""
+    all_dir = this_dir.strip().split("/")
+    for thing in all_dir:
+        test_dir += thing
+        if os.path.isdir(test_dir):
+            pass
+        else:
+            os.mkdir(test_dir)
+        test_dir += "/"
+
+
 class PlottingPackage(object):
     def __init__(self, cwd=None, save_dir_name="test"):
         """ A class for high-level customizaiton of figures
