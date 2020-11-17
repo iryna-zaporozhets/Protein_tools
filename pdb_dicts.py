@@ -5,8 +5,7 @@ structures and pdb files.
 
 """
 Dictionary dict_of_heavy_atoms maps 3-letter aminoacid code to the list of
-all heavy-atom namesas used in pdb files. Only ALA, VAL, GLN, GLY, ILE,
-LEU, LYS, THR are included at this point
+all heavy-atom namesas used in pdb files. Some of the aminoacids are not present in the dict.
 """
 dict_of_heavy_atoms = { "ALA" : ['N','CA','C','O','CB'],
                         "VAL" : ['N','CA','C','O','CB','CG1','CG2'],
@@ -15,7 +14,14 @@ dict_of_heavy_atoms = { "ALA" : ['N','CA','C','O','CB'],
                         "ILE" : ['N','CA','C','O','CB','CG1','CG2','CD1'],
                         "LEU" : ['N','CA','C','O','CB','CG','CD1','CD2'],
                         "LYS" : ['N','CA','C','O','CB','CG','CD','CE','NZ'],
-                        "THR" : ['N','CA','C','O','CB','OG1','CG2']
+                        "THR" : ['N','CA','C','O','CB','OG1','CG2'],
+                        "TYR" : ['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ','OH'],
+                        "ASN" : ['N','CA','C','O','CB','CG','OD1','ND2'],
+                        "MET" : ['N','CA','C','O','CB','CG','SD','CE'],
+                        "GLU" : ['N','CA','C','O','CB','CG','CD','OE1','OE2'],
+                        "ASP" : ['N','CA','C','O','CB','CG','OD1','OD2'],
+                        "PHE" : ['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ'],
+                        "TRP" : ['N','CA','C','O','CB','CG','CD1','CD2','NE1','CE2','CE3','CZ2','CZ3','CH2']
     }
 
 
