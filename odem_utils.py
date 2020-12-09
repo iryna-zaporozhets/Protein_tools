@@ -5,7 +5,7 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib
 import os
-import daytime
+import datetime
 import numpy as np
 import pandas as pd
 
