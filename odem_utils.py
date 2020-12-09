@@ -54,7 +54,7 @@ def generate_metadata(title, author, description=None, enable_warning=False):
     Dependencies
     ------------
     os
-    daytime
+    datetime
 
     Returns:
     -------
@@ -473,3 +473,16 @@ def  get_model_params(folder_list,
         else:
             param_list.append(params)
     return param_list
+
+
+def get_native_contact_ndx(reference_file):
+    """
+    The function returns indexes of native contacts in the array of
+    all contacts.  If a value in a reference file is 1, the contact is condidered
+    to be native, and nonnative otherwise
+    ASSUMPTION: ORDER OF CONTACTS IS THE SAME FOR ALL THE MODELINGS!
+    """
+
+    params = np.loadtxt(reference_file)
+    native_contact_ndx = np.argwhere(params > 0.999999).T[0]
+    return(native_contact_ndx)
