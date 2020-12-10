@@ -488,7 +488,7 @@ def get_native_contact_ndx(reference_file):
     native_contact_ndx = np.argwhere(params > 0.999999).T[0]
     return(native_contact_ndx)
 
-def get_contact_probability(traj,frames,pairs,cut_off_value):
+def get_contact_probability(traj,frames,pairs,cut_off_distance_nm):
     """
     Calculate contact probatility, that is defined as a fraction
     of frames, where distance between atoms defined in pairs is less
@@ -507,9 +507,9 @@ def get_contact_probability(traj,frames,pairs,cut_off_value):
           (generally 0-based) Each element of the list should have 2
           elements.
 
-    cut_off_value : float
-                    Value in nm. If  distance between two atoms, specified in `pairs`, is
-                    less than cut_off_value, contact considered formed.
+    cut_off_distance_nm : float
+                          Value in nm. If  distance between two atoms, specified in `pairs`, is
+                          less than cut_off_distance_nm, contact considered formed.
     """
     target_ensemble = traj[list(frames)]
     distances = md.compute_distances(target_ensemble, pairs)
