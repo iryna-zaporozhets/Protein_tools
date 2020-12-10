@@ -8,6 +8,7 @@ import os
 import datetime
 import numpy as np
 import pandas as pd
+import mdtraj as md
 
 
 def parse_info_file(filename):
@@ -519,7 +520,7 @@ def get_contact_probability(traj,frames,pairs,cut_off_value):
 def get_frame_ndx_by_committor(dtrajs, committor, limits):
     """
     Returns frame indexes, that have committor values in the range specified by limits.
-    
+
     Parameters:
     -----------
 
