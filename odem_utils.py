@@ -486,3 +486,73 @@ def get_native_contact_ndx(reference_file):
     params = np.loadtxt(reference_file)
     native_contact_ndx = np.argwhere(params > 0.999999).T[0]
     return(native_contact_ndx)
+
+def get_contact_probability(traj,frames,pairs,cut_off_value):
+    """
+    Calculate contact probatility, that is defined as a fraction
+    of frames, where distance between atoms defined in pairs is less
+    that cut_off_value
+
+    Parameters:
+    traj : mdtraj traj object
+           Trajectory to extract frames from
+
+    frames : list of int
+            Indexes of frames to be used in analysis.
+            0-based indexing should be used
+
+    pairs : list of iterables
+          List of pairs of atoms. Numbering should match trajectory.
+          (generally 0-based) Each element of the list should have 2
+          elements.
+
+    cut_off_value : float
+                    Value in nm. If  distance between two atoms, specified in `pairs`, is
+                    less than cut_off_value, contact considered formed.
+    """
+    target_ensemble = traj[list(frames)]
+    distances = md.compute_distances(target_ensemble, pairs)
+    contacts = np.where(distances <cut_off_distance_nm, 1,0)
+    probability = np.mean(contacts,axis=0)
+    return(probability)
+
+def get_frame_ndx_by_committor(dtrajs, committor, limits):
+    """
+    Returns frame indexes, that have committor values in the range specified by limits.
+    
+    Parameters:
+    -----------
+
+    dtrajs : str or 1D numpy array
+             Path to a file or 1D numpy array that
+             contains a microstate index (0-based) for each frame
+
+    committor : str or 1D numpy array
+                Path to a file or 1D numpy array that
+                contains committor values for each microstate. Microstates should be
+                0-based and correspond to microstates in dtrajs.
+
+    limits : iterable with two floats
+             Lower and upper limit of committor to include. Both lower and upper limits are
+             included
+
+    Returns:
+    --------
+
+    target_ndx : 1D numpy array
+                 Indexes of frames which have committor  value <= limits[1] and >= limits[2]
+    """
+
+    if isinstance(dtrajs , str):
+        dtrajs_arr = np.loadtxt(dtrajs,dtype=int)
+    else:
+        dtrajs_arr = dtrajs
+
+    if isinstance(committor,str):
+        committor_arr = np.loadtxt(committor)
+    else:
+        committor_arr = committor
+
+    target_microstates = np.where((committor_arr >= limits[0]) & (committor_arr <= limits[1]))
+    target_ndx = np.where(np.isin(dtrajs_arr, target_microstates[0]))[0]
+    return target_ndx
