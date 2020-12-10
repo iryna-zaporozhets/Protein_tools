@@ -559,20 +559,20 @@ def get_frame_ndx_by_committor(dtrajs, committor, limits):
     return target_ndx
 
     def float_to_path(number, dlm='.'):
-    """
-    Convert a floating-point number to a string,
-    that can be used in file name or path.
-    Trailing 0th are removed.
-    """
-    number_str = str(number)
-    number_parts = number_str.split(dlm)
-    assert len(number_parts) <= 2, "More than 1 delimiter found"
-    # check decimal part for nonzero characters:
-    has_decimal = False
-    for char in number_parts[1]:
-        if char != '0':
-            has_decimal = True
-    if has_decimal:
-        return number_parts[0] + '_' + number_parts[1]
-    else:
-        return number_parts[0]
+        """
+        Convert a floating-point number to a string,
+        that can be used in file name or path.
+        Trailing 0th are removed.
+        """
+        number_str = str(number)
+        number_parts = number_str.split(dlm)
+        assert len(number_parts) <= 2, "More than 1 delimiter found"
+        # check decimal part for nonzero characters:
+        has_decimal = False
+        for char in number_parts[1]:
+            if char != '0':
+                has_decimal = True
+        if has_decimal:
+            return number_parts[0] + '_' + number_parts[1]
+        else:
+            return number_parts[0]
