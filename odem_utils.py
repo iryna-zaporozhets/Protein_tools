@@ -576,3 +576,78 @@ def float_to_path(number, dlm='.'):
         return number_parts[0] + '_' + number_parts[1]
     else:
         return number_parts[0]
+
+def get_contact_probability_folder(folder, 
+                                   iteration,
+                                   committor_limits,
+                                   pairs,
+                                   cut_off_distance_nm=0.8
+                                   ):
+    """
+    Find probability that atom pairs listed in `pairs` are in contact in ensemble
+    defined by `committor_limits`. Locations of trajectory file and clusterization
+    files are determined based on "standart" layout of odem. 
+    TO DO: make layout changable
+    
+    folder : str
+             odem run folder
+    iteration : int
+               iteration number to get results for.
+    committor_limits : iterable with two floats
+    pairs : iterable 
+            Iterables contains pairs of atoms for which do calculations 
+    cut_off_distance_nm : float
+            Two atoms are considered in contact, if distance between them is less than cut_off_distance_nm.
+            Units should be nm.
+            
+            
+    ODEM LAYOUT SPECIFICATIONS:
+    file                :   path
+    info file           :  folder/newton_<iteration ndx>/info.txt
+    trajectory          :  folder/iteration_<iteration ndx>/traj.xtc
+    topology            :  folder/ref.pdb
+    committor file      :  folder/discretization_<iteration ndx>/commitor.txt
+    discrite trajectory :  folder/discretization_<iteration ndx>/dtrajs.txt
+    
+    
+    
+    """
+    
+    temperature, _, _ =  parse_info_file('{}/newton_{}/info.txt'.format(folder,iteration))
+    traj = md.load('{}/iteration_{}/{}/traj.xtc'.format(folder,iteration, float_to_path(temperature)), top='{}/ref.pdb'.format(folder))
+    committor_file = '{}/discretization_{}/{}/commitor.txt'.format(folder, iteration, float_to_path(temperature))
+    dtrajs_file = '{}/discretization_{}/{}/dtrajs.txt'.format(folder, iteration,  float_to_path(temperature))
+    ensemble_frames = get_frame_ndx_by_committor(dtrajs_file, committor_file, committor_limits)
+    num_ensemble_frames = len(ensemble_frames)
+    probability = get_contact_probability(traj,ensemble_frames, pairs,cut_off_distance_nm)
+    
+    return probability, num_ensemble_frames
+
+
+def get_contact_probabilities_folder_list(folder_list, iteration_list, committor_limits, pairs, cut_off_distance_nm):
+    """
+    Get contact probabilities and number of frames in ensembles for all the trajectories matching folder_list
+    and iteration_list
+    """
+    probabilities = []
+    num_ensemble_frames = []
+    for folder, iteration in zip(folder_list, iteration_list):
+        probability, frames = get_contact_probability_folder(folder, 
+                                                                   iteration=iteration,
+                                                                   committor_limits=committor_limits,
+                                                                   pairs=pairs,
+                                                                   cut_off_distance_nm=cut_off_distance_nm
+                                                                   )
+        probabilities.append(probability)
+        num_ensemble_frames.append(frames)
+    return probabilities, num_ensemble_frames
+
+
+def get_overall_probability(probabilities, num_ensemble_frames):
+    overall_probability = np.zeros(len(probabilities[0]))
+    total_frame_count = 0
+    for sample, frame_number in zip(probabilities, num_ensemble_frames):
+        total_frame_count += frame_number
+        overall_probability += sample*frame_number
+    overall_probability /= total_frame_count
+    return(overall_probability)
