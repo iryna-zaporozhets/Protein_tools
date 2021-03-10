@@ -41,7 +41,7 @@ def find_atoms_to_delete(res1,res2):
     return atoms_to_delete_names
 
 
-def revome_pdb_entry(pdb_file,entry_list,output_file):
+def remove_pdb_entry(pdb_file,entry_list,output_file):
     """
     The function generate a new pdb_file with
     entries, listed in entry_list, removed
