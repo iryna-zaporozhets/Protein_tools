@@ -640,7 +640,7 @@ def get_contact_probabilities_folder_list(folder_list, iteration_list, committor
                                                                    iteration=iteration,
                                                                    committor_limits=committor_limits,
                                                                    pairs=pairs,
-                                                                   cut_off_distance_nm=cut_off_distance_nm
+                                                                   cut_off_distance_nm=cut_off_distance_nm,
                                                                    traj_extension=traj_extension
                                                                    )
         probabilities.append(probability)
