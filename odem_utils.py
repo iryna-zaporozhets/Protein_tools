@@ -628,7 +628,7 @@ def get_contact_probability_folder(folder,
     return probability, num_ensemble_frames
 
 
-def get_contact_probabilities_folder_list(folder_list, iteration_list, committor_limits, pairs, cut_off_distance_nm):
+def get_contact_probabilities_folder_list(folder_list, iteration_list, committor_limits, pairs, cut_off_distance_nm, traj_extension='dcd'):
     """
     Get contact probabilities and number of frames in ensembles for all the trajectories matching folder_list
     and iteration_list
@@ -641,6 +641,7 @@ def get_contact_probabilities_folder_list(folder_list, iteration_list, committor
                                                                    committor_limits=committor_limits,
                                                                    pairs=pairs,
                                                                    cut_off_distance_nm=cut_off_distance_nm
+                                                                   traj_extension=traj_extension
                                                                    )
         probabilities.append(probability)
         num_ensemble_frames.append(frames)
