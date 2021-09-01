@@ -488,7 +488,7 @@ def get_native_contact_ndx(reference_file):
     native_contact_ndx = np.argwhere(params > 0.999999).T[0]
     return(native_contact_ndx)
 
-def get_contact_probability(traj,frames,pairs,cut_off_distance_nm):
+def get_contact_probability(traj,frames,pairs,cut_off_distance_nm, periodic=True):
     """
     Calculate contact probatility, that is defined as a fraction
     of frames, where distance between atoms defined in pairs is less
@@ -507,12 +507,16 @@ def get_contact_probability(traj,frames,pairs,cut_off_distance_nm):
           (generally 0-based) Each element of the list should have 2
           elements.
 
+
     cut_off_distance_nm : float
                           Value in nm. If  distance between two atoms, specified in `pairs`, is
                           less than cut_off_distance_nm, contact considered formed.
+
+    periodic : bool (True)
+               Determins, if distances should be calculated using periodic boundary conditions
     """
     target_ensemble = traj[list(frames)]
-    distances = md.compute_distances(target_ensemble, pairs)
+    distances = md.compute_distances(target_ensemble, pairs, periodic=periodic)
     contacts = np.where(distances <cut_off_distance_nm, 1,0)
     probability = np.mean(contacts,axis=0)
     return(probability)
@@ -582,7 +586,8 @@ def get_contact_probability_folder(folder,
                                    committor_limits,
                                    pairs,
                                    cut_off_distance_nm=0.8,
-                                   traj_extension='xtc'
+                                   traj_extension='xtc',
+                                   periodic=True
                                    ):
     """
     Find probability that atom pairs listed in `pairs` are in contact in ensemble
@@ -623,12 +628,12 @@ def get_contact_probability_folder(folder,
     dtrajs_file = '{}/discretization_{}/{}/dtrajs.txt'.format(folder, iteration,  float_to_path(temperature))
     ensemble_frames = get_frame_ndx_by_committor(dtrajs_file, committor_file, committor_limits)
     num_ensemble_frames = len(ensemble_frames)
-    probability = get_contact_probability(traj,ensemble_frames, pairs,cut_off_distance_nm)
+    probability = get_contact_probability(traj,ensemble_frames, pairs,cut_off_distance_nm, periodic=periodic)
 
     return probability, num_ensemble_frames
 
 
-def get_contact_probabilities_folder_list(folder_list, iteration_list, committor_limits, pairs, cut_off_distance_nm, traj_extension='dcd'):
+def get_contact_probabilities_folder_list(folder_list, iteration_list, committor_limits, pairs, cut_off_distance_nm, traj_extension='dcd', periodic=True):
     """
     Get contact probabilities and number of frames in ensembles for all the trajectories matching folder_list
     and iteration_list
@@ -641,7 +646,8 @@ def get_contact_probabilities_folder_list(folder_list, iteration_list, committor
                                                                    committor_limits=committor_limits,
                                                                    pairs=pairs,
                                                                    cut_off_distance_nm=cut_off_distance_nm,
-                                                                   traj_extension=traj_extension
+                                                                   traj_extension=traj_extension,
+                                                                   periodic=periodic
                                                                    )
         probabilities.append(probability)
         num_ensemble_frames.append(frames)
