@@ -658,7 +658,61 @@ def get_overall_probability(probabilities, num_ensemble_frames):
     overall_probability = np.zeros(len(probabilities[0]))
     total_frame_count = 0
     for sample, frame_number in zip(probabilities, num_ensemble_frames):
+        # If there no frames, no contribution were made
+        if frame_number == 0:
+            continue 
         total_frame_count += frame_number
         overall_probability += sample*frame_number
     overall_probability /= total_frame_count
     return(overall_probability)
+
+
+def get_trajectory_by_commitor(folder,
+                      iteration,
+                      committor_limits,
+                      traj_extension='xtc',
+                    periodic=True
+                                   ):
+    """
+    extract frame, with commitor values devined by committor_limits from a folder structured according
+    to the ODEM optimization conventions.
+    folder : str
+             odem run folder
+    iteration : int
+               iteration number to get results for.
+    committor_limits : iterable with two floats
+    traj_extension : str, default xtc
+            trajectory extension
+
+    Returns:
+    --------
+
+    selected_traj : mdtraj Trajectory object
+                   Trajectory containing frames with committor values within committor_limits
+
+    ensemble_frames : list of ints
+                    Indexed of frames from the full trajectory, contained in `selected_traj`
+    
+    ODEM LAYOUT SPECIFICATIONS:
+    file                :   path
+    info file           :  folder/newton_<iteration ndx>/info.txt
+    trajectory          :  folder/iteration_<iteration ndx>/traj.<traj_extension>
+    topology            :  folder/ref.pdb
+    committor file      :  folder/discretization_<iteration ndx>/commitor.txt
+    discrite trajectory :  folder/discretization_<iteration ndx>/dtrajs.txt
+
+    
+
+
+
+    """
+
+    temperature, _, _ =  parse_info_file('{}/newton_{}/info.txt'.format(folder,iteration))
+    traj = md.load('{}/iteration_{}/{}/traj.{}'.format(folder,iteration, float_to_path(temperature), traj_extension),
+    top='{}/ref.pdb'.format(folder))
+    committor_file = '{}/discretization_{}/{}/commitor.txt'.format(folder, iteration, float_to_path(temperature))
+    dtrajs_file = '{}/discretization_{}/{}/dtrajs.txt'.format(folder, iteration,  float_to_path(temperature))
+    ensemble_frames = list(get_frame_ndx_by_committor(dtrajs_file, committor_file, committor_limits))
+    selected_traj  =  traj[ensemble_frames]
+    return selected_traj, ensemble_frames
+
