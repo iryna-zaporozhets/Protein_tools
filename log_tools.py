@@ -73,7 +73,7 @@ def log_execution_info(output=sys.stdout,
                     output.write("Repository tree state \n")
                     output.write(result.decode(sys.stdout.encoding))
             else:
-                output.write("Clean repository tree")
+                output.write("Clean working tree \n")
         except:
             output.write("No information about git tree state was found. \n")
     
