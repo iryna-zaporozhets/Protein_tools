@@ -58,12 +58,11 @@ def log_execution_info(output=sys.stdout,
 
     if log_repo_version:
         output.write("VERSION CONTROL INFORMATION \n")
-        if 1:
-        #try:
+        try:
             label = subprocess.run(["git", "describe", "--always", "--first-parent", "--long", '--abbrev=14'], capture_output=True).stdout.decode(sys.stdout.encoding)
             output.write("Current version of the git repository: ")
             output.write(label)
-        #except: 
+        except: 
             output.write("Was not able to get git repository info.\n")
         try:
             result = subprocess.run(["git", "status", "-s", "--porcelain"], capture_output=True).stdout
