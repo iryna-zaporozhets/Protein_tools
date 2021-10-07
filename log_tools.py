@@ -66,12 +66,14 @@ def log_execution_info(output=sys.stdout,
             output.write("Was not able to get git repository info.\n")
         try:
             result = subprocess.run(["git", "status", "-s", "--porcelain"], capture_output=True).stdout
-            print(result)
-            if result.split()[0]  == 'fatal:':
-                output.write("No information about git tree state was found. \n")
+            if len(result) > 0:
+                if result.split()[0]  == 'fatal:':
+                    output.write("No information about git tree state was found. \n")
+                else:
+                    output.write("Repository tree state \n")
+                    output.write(result.decode(sys.stdout.encoding))
             else:
-                output.write("Repository tree state \n")
-                output.write(result.decode(sys.stdout.encoding))
+                output.write("Clean repository tree")
         except:
             output.write("No information about git tree state was found. \n")
     
