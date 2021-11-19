@@ -116,7 +116,7 @@ def q_factor(D_measured,D_calculated,normalization='n'):
     return q
 
 
-def best_hummer_q(traj, native, beta_const=50, lambda_const=1.2, native_cutoff=1.2):
+def best_hummer_q(traj, native=None, beta_const=50, lambda_const=1.2, native_cutoff=1.2):
     """Compute the fraction of native contacts according the definition from
     Best, Hummer and Eaton [1]
     Cde modified from (https://mdtraj.org/1.9.3/examples/native-contact.html)
@@ -153,7 +153,6 @@ def best_hummer_q(traj, native, beta_const=50, lambda_const=1.2, native_cutoff=1
           mechanisms in atomistic simulations" PNAS (2013)
     """
   
-    
     # get the indices of all of the heavy atoms
     heavy = native.topology.select_atom_indices('heavy')
     # get the pairs of heavy atoms which are farther than 3
@@ -167,12 +166,11 @@ def best_hummer_q(traj, native, beta_const=50, lambda_const=1.2, native_cutoff=1
     heavy_pairs_distances = md.compute_distances(native[0], heavy_pairs)[0]
     # and get the pairs s.t. the distance is less than NATIVE_CUTOFF
     native_contacts = heavy_pairs[heavy_pairs_distances < native_cutoff]
-    print("Number of native contacts", len(native_contacts))
-    
+    print("Number of native contacts", len(native_contacts)) 
     # now compute these distances for the whole trajectory
     r = md.compute_distances(traj, native_contacts)
     # and recompute them for just the native state
     r0 = md.compute_distances(native[0], native_contacts)
     
     q = np.mean(1.0 / (1 + np.exp(beta_const * (r - lambda_const * r0))), axis=1)
-    return q  
+    return np.expand_dims(q, axis=1)  
