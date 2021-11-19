@@ -1,5 +1,6 @@
 import mdtraj as md
 import numpy  as np
+from itertools import combinations
 
 def RMSD1to1(traj1,traj2):
     """
