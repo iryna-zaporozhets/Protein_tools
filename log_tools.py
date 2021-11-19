@@ -15,6 +15,7 @@ import time
 import os 
 import argparse
 import inspect
+import pathlib
 
 def log_execution_info(output=sys.stdout,
                        log_python_info=True,
@@ -32,7 +33,9 @@ def log_execution_info(output=sys.stdout,
     # log location of the script that calls the current function
     stack = inspect.stack()
     path_parent = os.path.abspath(stack[1][1])
-    output.write(f"Script source code located at {os.path.dirname(path_parent)}\n")
+    source_code_loc = os.path.dirname(path_parent) 
+    # pathlib resolves possible simlinks
+    output.write(f"Script source code located at {pathlib.Path(source_code_loc).resolve()}\n")
     output.write(f"Working directory: {os.getcwd()} \n")
     output.write("\n")
 
@@ -53,19 +56,27 @@ def log_execution_info(output=sys.stdout,
         output.write('\n')
         output.write("PYTHON INFO \n")
         output.write(f"Version : {sys.version} \n")
-        output.write(f"Executable location : {sys.executable} \n")
+        output.write(f"Executable location : {pathlib.Path(sys.executable).resolve()} \n")
         output.write('\n')
 
     if log_repo_version:
         output.write("VERSION CONTROL INFORMATION \n")
+        print(source_code_loc)
         try:
-            label = subprocess.run(["git", "describe", "--always", "--first-parent", "--long", '--abbrev=14'], capture_output=True).stdout.decode(sys.stdout.encoding)
+            label = subprocess.run(["git", 
+                                    "-c", 
+                                    source_code_loc, 
+                                    "describe",
+                                    "--always",
+                                    "--first-parent",
+                                    "--long",
+                                    '--abbrev=14'], capture_output=True).stdout.decode(sys.stdout.encoding)
+            print("LABEL: ", label)
             output.write("Current version of the git repository: ")
-            output.write(label)
         except: 
             output.write("Was not able to get git repository info.\n")
         try:
-            result = subprocess.run(["git", "status", "-s", "--porcelain"], capture_output=True).stdout
+            result = subprocess.run(["git", "-c", source_code_loc,  "status", "-s", "--porcelain"], capture_output=True).stdout
             if len(result) > 0:
                 if result.split()[0]  == 'fatal:':
                     output.write("No information about git tree state was found. \n")
