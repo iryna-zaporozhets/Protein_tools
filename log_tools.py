@@ -61,22 +61,20 @@ def log_execution_info(output=sys.stdout,
 
     if log_repo_version:
         output.write("VERSION CONTROL INFORMATION \n")
-        print(source_code_loc)
         try:
             label = subprocess.run(["git", 
-                                    "-c", 
-                                    source_code_loc, 
+                                    "-C", 
+                                    f"{source_code_loc}/.", 
                                     "describe",
                                     "--always",
                                     "--first-parent",
                                     "--long",
                                     '--abbrev=14'], capture_output=True).stdout.decode(sys.stdout.encoding)
-            print("LABEL: ", label)
-            output.write("Current version of the git repository: ")
+            output.write(f"Current version of the git repository: {label} \n")
         except: 
             output.write("Was not able to get git repository info.\n")
         try:
-            result = subprocess.run(["git", "-c", source_code_loc,  "status", "-s", "--porcelain"], capture_output=True).stdout
+            result = subprocess.run(["git", "-C", source_code_loc,  "status", "-s", "--porcelain"], capture_output=True).stdout
             if len(result) > 0:
                 if result.split()[0]  == 'fatal:':
                     output.write("No information about git tree state was found. \n")
