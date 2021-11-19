@@ -113,3 +113,65 @@ def q_factor(D_measured,D_calculated,normalization='n'):
 
     q = rms(np.subtract(D_measured,D_calculated),normalization)/rms(D_measured,normalization)
     return q
+
+
+def best_hummer_q(traj, native, beta_const=50, lambda_const=1.2, native_cutoff=1.2):
+    """Compute the fraction of native contacts according the definition from
+    Best, Hummer and Eaton [1]
+    Cde modified from (https://mdtraj.org/1.9.3/examples/native-contact.html)
+    Parameters for different coarse-grained models taken from 
+    Habibi M, Rottler J, Plotkin SS. As Simple As Possible, but Not Simpler:
+    Exploring the Fidelity of Coarse-Grained Protein Models for 
+    Simulated Force Spectroscopy. PLoS Comput Biol. 2016;12(11):e1005211. 
+    Published 2016 Nov 29. doi:10.1371/journal.pcbi.1005211
+
+    Parameters
+    ----------
+    traj : md.Trajectory
+        The trajectory to do the computation for
+    native : md.Trajectory
+        The 'native state'. This can be an entire trajecory, or just a single frame.
+        Only the first conformation is used
+    beta_const : float, 1/nm
+          Beta constant. 50 1/nm for  AA/HA-Go, AWSEM, Calpha-Go
+
+    lambda_constant : float
+                   1.8 for AA and HA-Go, 1.2 for AWSEM and Calpha-Go
+
+    native_cutoff : float, nm
+                    0.48 for AA and HA-Go, 0.6 for AWSEM, 1.2 for Ca-Go
+        
+    Returns
+    -------
+    q : np.array, shape=(len(traj),)
+        The fraction of native contacts in each frame of `traj`
+        
+    References
+    ----------
+    ..[1] Best, Hummer, and Eaton, "Native contacts determine protein folding
+          mechanisms in atomistic simulations" PNAS (2013)
+    """
+  
+    
+    # get the indices of all of the heavy atoms
+    heavy = native.topology.select_atom_indices('heavy')
+    # get the pairs of heavy atoms which are farther than 3
+    # residues apart
+    heavy_pairs = np.array(
+        [(i,j) for (i,j) in combinations(heavy, 2)
+            if abs(native.topology.atom(i).residue.index - \
+                   native.topology.atom(j).residue.index) > 3])
+    
+    # compute the distances between these pairs in the native state
+    heavy_pairs_distances = md.compute_distances(native[0], heavy_pairs)[0]
+    # and get the pairs s.t. the distance is less than NATIVE_CUTOFF
+    native_contacts = heavy_pairs[heavy_pairs_distances < native_cutoff]
+    print("Number of native contacts", len(native_contacts))
+    
+    # now compute these distances for the whole trajectory
+    r = md.compute_distances(traj, native_contacts)
+    # and recompute them for just the native state
+    r0 = md.compute_distances(native[0], native_contacts)
+    
+    q = np.mean(1.0 / (1 + np.exp(beta_const * (r - lambda_const * r0))), axis=1)
+    return q  
