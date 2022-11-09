@@ -32,7 +32,7 @@ sidechain_atoms = { "ALA" : ['CB'],
                     "TYR" : ['CB', 'CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ', 'OH'],
                     "VAL" : ['CB', 'CG1', 'CG2']
                     }
-dict_of_heavy_atoms = {item : backbone_atoms + value for item, value in sidechain_atoms.values() }
+dict_of_heavy_atoms = {item : backbone_atoms + value for item, value in sidechain_atoms.items() }
 
 
 """
