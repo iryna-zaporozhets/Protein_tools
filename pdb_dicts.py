@@ -27,7 +27,7 @@ sidechain_atoms = { "ALA" : ['CB'],
                     "PHE" : ['CB', 'CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ'],
                     "PRO" : ['CB', 'CG', 'CD'],
                     "SER" : ["CB", 'OG'],
-                    "TRE" : ['CB', 'OG1', 'CG2'],
+                    "THR" : ['CB', 'OG1', 'CG2'],
                     "TRP" : ['CB', 'CG', 'CD1', 'CD2', 'NE1', 'CE2', 'CE3', 'CZ2', 'CZ3', 'CH2'],
                     "TYR" : ['CB', 'CG', 'CD1', 'CD2', 'CE1', 'CE2', 'CZ', 'OH'],
                     "VAL" : ['CB', 'CG1', 'CG2']
