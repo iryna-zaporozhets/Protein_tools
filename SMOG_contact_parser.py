@@ -354,7 +354,7 @@ def write_pairs_dictionary(pairs_dictionary,filename):
     out_file.close()
     return 0
 
-def find_mutation_contacts(mutation, wt_contacts,topology_file):
+def find_mutation_contacts(mutation, wt_contacts,topology_file, allow_Thr_to_Ser=False):
     """ The function creates array of native contacts in mutant based
         on mutation code and list of
 
@@ -379,7 +379,7 @@ def find_mutation_contacts(mutation, wt_contacts,topology_file):
     """
     wt_topology = wt_topology = md.load(topology_file).top
     res_id, res1, res2 = pdb_mutator.decode_mutation(mutation)
-    atoms_to_delete = pdb_mutator.find_atoms_to_delete(res1, res2)
+    atoms_to_delete = pdb_mutator.find_atoms_to_delete(res1, res2, allow_Thr_to_Ser=allow_Thr_to_Ser)
     # selection - atom index, that should be deleted.  Atom indexed from 0.
     selection = [atom.index for atom in wt_topology.atoms
                  if ((atom.residue.index == res_id-1)

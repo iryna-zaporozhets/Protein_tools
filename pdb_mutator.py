@@ -3,7 +3,7 @@ import re
 from .pdb_dicts import dict_of_heavy_atoms, names_3_to_1, names_1_to_3
 
 
-def find_atoms_to_delete(res1,res2):
+def find_atoms_to_delete(res1,res2, allow_Thr_to_Ser=False):
     """
     The function compare list of havy atoms of res1 and res2  and finds,
      which atoms are present in res1 but not in res2.
@@ -28,6 +28,11 @@ def find_atoms_to_delete(res1,res2):
     dict_of_heavy_atoms is required to be present in global name space
 
     """
+    # There is a special case: mutation of Threonine into Serine. It is possible, but atom names do not completely match:
+    if allow_Thr_to_Ser:
+        if res1 == 'THR' and (res2 == 'SER'):
+            return ['CG2']
+
     for atom in dict_of_heavy_atoms[res2]:
         if atom not in dict_of_heavy_atoms[res1]:
             raise ValueError("Mutation is not allowed. The second residue has atoms, not present in the first residue")
